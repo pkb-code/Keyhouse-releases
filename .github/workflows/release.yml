@@ -1,0 +1,46 @@
+name: Create Release from Private Repo
+
+on:
+  repository_dispatch:
+    types: [new-release]
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up variables
+        run: |
+          echo "PRIVATE_REPO=https://api.github.com/repos/pkb-code/keyhouse" >> $GITHUB_ENV
+          echo "PUBLIC_REPO=https://api.github.com/repos/pkb-code/keyhouse-releases" >> $GITHUB_ENV
+
+      - name: Get latest release from private repo
+        id: get_release
+        run: |
+          latest_release_url="${{ env.PRIVATE_REPO }}/releases/latest"
+          assets=$(curl -s \
+            -H "Authorization: token ${{ secrets.PRIVATE_REPO_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            $latest_release_url | jq -r '.assets[] | .url')
+          echo $assets > assets.txt
+
+      - name: Download all assets from private repo
+        run: |
+          mkdir -p release_assets
+          while read -r asset_url; do
+            asset_name=$(curl -s \
+              -H "Authorization: token ${{ secrets.PRIVATE_REPO_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              $asset_url | jq -r '.name')
+            curl -L -o release_assets/$asset_name \
+              -H "Authorization: token ${{ secrets.PRIVATE_REPO_TOKEN }}" \
+              -H "Accept: application/octet-stream" \
+              $asset_url
+          done < assets.txt
+
+      - name: Create release in public repo
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release_assets/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
