@@ -12,7 +12,7 @@ jobs:
       - name: Set up variables
         run: |
           echo "PRIVATE_REPO=https://api.github.com/repos/pkb-code/keyhouse" >> $GITHUB_ENV
-          echo "PUBLIC_REPO=https://api.github.com/repos/pkb-code/keyhouse-releases" >> $GITHUB_ENV
+          echo "PUBLIC_REPO=https://api.github.com/repos/pkb-code/Keyhouse-releases" >> $GITHUB_ENV
 
       - name: Get latest release from private repo
         id: get_release
