@@ -47,3 +47,19 @@ jobs:
           files: release_assets/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Delete source code assets
+        run: |
+          release_id=$(curl -s \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/pkb-code/Keyhouse-releases/releases/tags/${{ env.TAG_NAME }} | jq -r '.id')
+
+          assets=$(curl -s \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/pkb-code/Keyhouse-releases/releases/$release_id/assets | jq -r '.[] | select(.name | endswith(".zip") or endswith(".tar.gz")) | .id')
+
+          for asset_id in $assets; do
+            curl -X DELETE \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              https://api.github.com/repos/pkb-code/Keyhouse-releases/releases/assets/$asset_id
+          done
