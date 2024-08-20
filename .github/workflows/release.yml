@@ -24,7 +24,7 @@ jobs:
           assets=$(curl -s \
             -H "Authorization: token ${{ secrets.PRIVATE_REPO_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/TU_USUARIO/TU_REPOSITORIO_PRIVADO/releases/latest | jq -r '.assets[] | select(.name | endswith(".zip") or endswith(".tar.gz") | not) | .url')
+            https://api.github.com/repos/pkb-code/keyhouse/releases/latest | jq -r '.assets[] | select(.name | endswith(".zip") or endswith(".tar.gz") | not) | .url')
 
           mkdir -p release_assets
 
